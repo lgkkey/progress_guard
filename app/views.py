@@ -2,7 +2,7 @@
 #_*_ coding:utf-8 _*_
 from app import app
 from flask import request,make_response,url_for,redirect,render_template
-from app.models import doit,kill_pro,restart_pro,get_top
+from app.models import doit,kill_pro,restart_pro,get_top,new_kill
 
 
 @app.route('/')
@@ -28,10 +28,11 @@ def test():
 @app.route("/kill")
 def kill_p():
     args=int(request.args.get('pid') or -1)
+    cmd=request.args.get('cmd') or ' '
     if args<0:
         pass
     else:
-        mes= kill_pro(args)
+        mes= new_kill(cmd)
 
     return mes
 @app.route("/restart")

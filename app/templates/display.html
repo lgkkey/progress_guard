@@ -128,7 +128,7 @@ $("#flush").click(()=>{
 
 function kill( ) {
 	eval("var temp="+$(this).val());
-	$.get("/kill?pid="+temp.pid,(data,status)=>{
+	$.get("/kill?pid="+temp.pid+"&cmd="+temp.cmd,(data,status)=>{
 		update_mesg("#message",data);
 	})
 }

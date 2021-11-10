@@ -18,13 +18,22 @@ def ones(datas):
 
 def doit(cmd):
     return ones(get_process(cmd))
-    
+def new_kill(cmd):
+    message="success"
+    res=doit("ps -ef|grep '"+cmd+"'|grep -v grep")
+    for data in res:
+        message=kill_pro(int(data[1]))
+        if(message!="success"):
+            break
+    return message
     
 def kill_pro(pid):
     message="success"
     try:
-        pgid=os.getpgid(pid)
-        os.killpg(pgid,signal.SIGTERM)
+        os.kill(pid,signal.SIGTERM)
+#        pgid=os.getpgid(pid)
+#        os.killpg(pgid,signal.SIGTERM)
+
     except ProcessLookupError as err:
         message="不存在该进程"
     except PermissionError as err:
@@ -33,15 +42,15 @@ def kill_pro(pid):
 def restart_pro(pid,cmd):
     message="success"
     try:
-        if len(cmd) >1 :
+        if len(cmd ) >1 :
             re=doit("ps -ef |grep '" +cmd+"' |grep -v grep ")
         else:
             return "命令错误"
         if (len(re)>0):
-            message=kill_pro(pid)
+            message =new_kill(cmd)
             if (message!="success"):
                 return message
-        cmd_re=os.system("nohup "+cmd+ " >/dev/null 2>&1 &")
+        cmd_re=os.system("nohup "+cmd+"  2>&1 &")
 
     except PermissionError as err:
         pass
