@@ -2,7 +2,7 @@
 #_*_ coding:utf-8 _*_
 from app import app
 from flask import request,make_response,url_for,redirect,render_template
-from app.models import doit,print_proc,kill_pro,restart_pro,get_top
+from app.models import doit,kill_pro,restart_pro,get_top
 
 
 @app.route('/')
