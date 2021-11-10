@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+	<script src="/static/jquery.js"></script>
+	<style type="text/css">
+		ul {
+			display: inline-block;
+			width: 15%;
+			vertical-align: top;
+
+		}
+	</style>
+	</script>
+	<head>
+		<meta charset="utf-8">
+		<title>进程管理</title>
+	</head>
+	<body>
+		<div id="welcome"><h1>欢迎使用进程管理工具</h1></div>
+		<hr>
+		<div id='top' >
+
+				
+
+			<ul ><h4>普通信息:</h4>
+				<li>时间： </li>
+				<li>用户数：</li>
+				<li>系统启动时间：</li>
+			</ul>
+
+
+				
+			<ul ><h4>进程信息:</h4>
+				<li>进程数:</li>
+				<li>正在运行:</li>
+				<li>休眠进程:</li>
+			</ul>
+
+			<ul><h4>CPU:</h4>
+				<li>用户占用：</li>
+				<li>内核占用：</li>
+				<li>空闲：</li>
+			</ul>
+			<ul><h4>内存:</h4>
+				<li>总容量：</li>
+				<li>空闲：</li>
+				<li>已使用：</li>
+				<li>缓冲区：</li>
+			</ul>
+			<ul><h4>交换区:</h4>
+				<li>总容量：</li>
+				<li>空闲：</li>
+				<li>已使用：</li>
+				<li>缓冲区：</li>
+			</ul>
+
+		</div>
+		<hr>
+		<input type="text" id="tsearch" ><button id="bsearch">查找</button><input type="button" value="刷新" id="flush">
+		<p><h2>执行结果:</h2><h3 id="message"></h3></p>
+		<h4>	<table border="1">
+			<thead>
+				
+				<tr>
+					<th>用户ID</th>
+					<th>进程ID</th>
+					<th>父进程的进程ID</th>
+					<th>运行命令</th>
+					<th>操作(重启/停止)</th>
+				</tr>
+			</thead>
+			<tbody id="data">
+				
+				
+				<tr>
+					<td>1</td>
+					<td>2</td>
+					<td>3</td>
+					<td>4</td>
+					<td><button>重启</button><button>停止</button></td>
+				</tr>
+			</tbody>
+			
+		</table>
+		<tfoot>
+		</tfoot></h4>
+	</body>
+</html>
+<script type="text/javascript">
+	$(document).ready(()=>{
+		$("#welcome").click(function(){
+			$(this).hide()
+		});
+		search();
+		setInterval(()=>{
+					get_top();
+								},1000)
+	});
+function parse(re_datas){
+	var datas=re_datas.body;
+	var len=datas.length-1;
+	var html=""
+	datas.forEach(data=>{
+		html+="<tr><td>"
+		html+=data[0]+"</td><td>";
+		html+=data[1]+"</td><td>";
+		html+=data[2]+"</td><td>";
+		html+=data[7]+"</td><td>";
+		var cmd=data.slice(7).join(' ');
+
+		var val="{pid:"+data[1]+",cmd:'"+cmd+"'}";
+		html+='<button class="brestart" value="'+val+'">重启</button><button class="bkill" value="'+val+'">停止</button></td></tr>';
+	});
+
+	$("#data").html(html);
+	$(".brestart").click(restart);
+	$(".bkill").click(kill);
+
+
+}
+$("#flush").click(()=>{
+	$.get("/get",(data,status)=>{
+		if (data.body.length>0) {
+			update_mesg("#message",status);
+			parse(data);
+		}
+	});
+});
+
+function kill( ) {
+	eval("var temp="+$(this).val());
+	$.get("/kill?pid="+temp.pid,(data,status)=>{
+		update_mesg("#message",data);
+	})
+}
+function restart() {
+	eval("var temp="+$(this).val());
+	$.get("/restart?pid="+temp.pid+"&cmd="+temp.cmd,(data,status)=>{
+		
+	        update_mesg("#message",data)
+
+	});
+}
+function search(){
+	$("#bsearch").click(()=>{
+		$.get("/search?key="+$("#tsearch").val(),(data,status)=>{
+			if (data.body.length>0) {
+				update_mesg("#message",status);
+				parse(data);
+			}
+		});
+	});
+}
+function update_mesg(el,txt){
+	$(el).text(txt);
+	setTimeout(()=>{
+		$(el).text(' ');
+	},1000);
+}
+
+function get_top(){
+    $.get("/top",(data)=>{
+		html="<ul ><h4>普通信息:</h4><li>时间： "+data.time;
+		html+="</li><li>用户数："+data.users;
+		html+="</li><li>系统启动时间：<br>"+data.uptime;
+		html+="</li></ul><ul ><h4>进程信息:</h4><li>进程数:"+data.proc_num;
+		html+="</li><li>正在运行:"+data.running;
+		html+="</li><li>休眠进程:"+data.sleeping;
+		html+="</li></ul><ul><h4>CPU(%):</h4><li>用户占用："+data.us;
+		html+="</li><li>内核占用："+data.sy;
+		html+="</li><li>空闲："+data.id;
+		html+="</li></ul><ul><h4>内存:</h4><li>总容量："+data.memtotal;
+		html+="</li><li>空闲："+data.memfree;
+		html+="</li><li>已使用："+data.memused;
+		html+="</li><li>缓冲区："+data.membuff;
+		html+="</li></ul><ul><h4>交换区:</h4><li>容量："+data.swaptotal;
+		html+="</li><li>空闲："+data.swapfree;
+		html+="</li><li>已使用："+data.swapused;
+		html+="</li><li>缓冲区："+data.swapcache;
+		html+="</li></ul>";
+		
+		$("#top").html(html);
+
+	});
+
+}
+</script>
