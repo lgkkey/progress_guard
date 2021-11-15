@@ -118,6 +118,7 @@ function parse(re_datas){
 
 }
 $("#flush").click(()=>{
+	clear_mesg("#message");
 	$.get("/get",(data,status)=>{
 		if (data.body.length>0) {
 			update_mesg("#message",status);
@@ -127,12 +128,15 @@ $("#flush").click(()=>{
 });
 
 function kill( ) {
+	
+	clear_mesg("#message");
 	eval("var temp="+$(this).val());
 	$.get("/kill?pid="+temp.pid+"&cmd="+temp.cmd,(data,status)=>{
 		update_mesg("#message",data);
 	})
 }
 function restart() {
+	clear_mesg("#message");
 	eval("var temp="+$(this).val());
 	$.get("/restart?pid="+temp.pid+"&cmd="+temp.cmd,(data,status)=>{
 		
@@ -141,20 +145,23 @@ function restart() {
 	});
 }
 function search(){
+	clear_mesg("#message");
 	$("#bsearch").click(()=>{
 		$.get("/search?key="+$("#tsearch").val(),(data,status)=>{
 			if (data.body.length>0) {
 				update_mesg("#message",status);
-				parse(data);
-			}
+			}else
+				update_mesg("#message","无查询结果");
+			parse(data);
+
 		});
 	});
 }
 function update_mesg(el,txt){
 	$(el).text(txt);
-	setTimeout(()=>{
-		$(el).text(' ');
-	},1000);
+}
+function clear_mesg(el){
+	$(el).text(" ");
 }
 
 function get_top(){

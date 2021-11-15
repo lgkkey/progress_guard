@@ -2,7 +2,7 @@
 #_*_ coding:utf-8 _*_
 
 import os
-import signal
+import signal,config
 
 def get_process(cmd):
     return os.popen(cmd).read().split('\n')
@@ -47,10 +47,15 @@ def restart_pro(pid,cmd):
         else:
             return "命令错误"
         if (len(re)>0):
+            for d in re:
+                if(int(d[1])==os.getpid()):
+                    os.system("./start.sh 2 &")
+                    break
+
             message =new_kill(cmd)
             if (message!="success"):
                 return message
-        cmd_re=os.system("nohup "+cmd+"  2>&1 &")
+            cmd_re=os.system("nohup "+cmd+" "+config.conf["log"]+" 2>"+config.conf["err"]+" &")
 
     except PermissionError as err:
         pass
