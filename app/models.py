@@ -66,9 +66,9 @@ def get_top():
     top=os.popen("top -bi -n 1").read().split('\n\n')[0].split('\n')
     top1=[d for d in top[0].replace(',',' ').split(' ') if d]
     sysinfo['time']=top1[2]
-    sysinfo['uptime']='-'.join(top1[4:7])
-    sysinfo['users']=top1[7]
-    sysinfo['loadavg']=top1[11:14]
+    sysinfo['uptime']='-'.join(top1[4:-7])
+    sysinfo['users']=top1[-7]
+    sysinfo['loadavg']=top1[-3:]
     top2=[d for d in top[1].replace(',',' ').split(' ') if d]
     sysinfo['proc_num']=top2[1]
     sysinfo['running']=top2[3]
